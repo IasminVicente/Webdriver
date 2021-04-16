@@ -1,0 +1,110 @@
+package tests;
+
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import suporte.Generator;
+import suporte.Screenshot;
+import suporte.Web;
+
+import java.util.concurrent.TimeUnit;
+//Aula 11, não aparece a opção DataDrivenTestRunner que é a biblioteca do easytest
+
+public class informacoesUsuarioTest {
+    public WebDriver navegador;
+
+    @Rule
+    public TestName test = new TestName();
+
+    @Before public void setUp(){
+       navegador = Web.createChrome();
+
+        //clicar no link que possui o texto "Sign in"
+        navegador.findElement(By.linkText("Sign in")).click();
+
+        //identificando o formulario de Login
+        WebElement formularioSignInBox = navegador.findElement(By.id("signinbox"));
+
+        //digitar no campo com o nome "login" que esta dentro do formulario de id "signinbox" o tesxto "julio0001"
+        formularioSignInBox.findElement(By.name("login")).sendKeys( "julio0001");
+
+        //digitar no campo com o nome "password" que esta dentro do formulario de id "signinbox" o tesxto "123456"
+        formularioSignInBox.findElement(By.name("password")).sendKeys("123456");
+
+        //clicar no link com o texto "SIGN IN"
+        navegador.findElement(By.linkText("SIGN IN")).click();
+
+        //Clicar em um link que possui a class "me"
+        navegador.findElement(By.className("me")).click();
+
+        //Clicar em um link que possui o texto "MORE DATA ABOUT YOU"
+        navegador.findElement(By.linkText("MORE DATA ABOUT YOU")).click();
+    }
+    //@Test
+    public void testAdicionarUmaInformacaoAdcionalDoUsuario(){
+
+        //Clicar no botão através do seu xpath //button[@data-targets="addmoredata"]
+         navegador.findElement(By.xpath("//button[@data-target='addmoredata']")).click();
+
+        //Identificar a popup onde está o formulário de id addmoredata
+        WebElement popupAddMoreData = navegador.findElement(By.id("addmoredata"));
+
+        //Na combo de name "type" escolher a opção "Phone"
+        WebElement campoType = popupAddMoreData.findElement(By.name("type"));
+        new Select(campoType).selectByVisibleText("Phone");
+
+        //No campo de name "contact" digitar "+5511999999999"
+        popupAddMoreData.findElement(By.name("contact")).sendKeys("+5511999999999");
+
+        //Clicar no link de text "SAVE" que está na popup
+        popupAddMoreData.findElement(By.linkText("SAVE")).click();
+
+        //Na mensagem de id "toast-container" validar que o texto que é "Your contact has been added"
+        WebElement mensagemPop = navegador.findElement(By.id("toast-container"));
+        String mensagem = mensagemPop.getText();
+        assertEquals("Your contact has been added!",mensagem );
+    }
+    @Test
+    public void removerUmContatoDeUmUsuário(){
+        //Clicar no elemento pelo seu xpath //span[text()="+5511999999999"]/following-sibling::a
+        navegador.findElement(By.xpath("//span[text()=\"+5511999999999\"]/following-sibling::a")).click();
+
+        //Confirmar a janela JavaScript
+        navegador.switchTo().alert().accept();
+
+        //Validar que a mensagem apresentada foi Rest in peace, dear phone!
+        WebElement mensagemPop = navegador.findElement(By.id("toast-container"));
+        String mensagem = mensagemPop.getText();
+        assertEquals("Rest in peace, dear phone!",mensagem );
+
+        Screenshot.tirar(navegador,"C:\\Users\\Iasmin Silva\\IdeaProjects\\Test-report\\test"+ Generator.dataHoraParaArquivo()+test.getMethodName() +".png");
+
+        //Aguardar até 10 segundos para que a janela desapareça
+        WebDriverWait aguardar =  new WebDriverWait(navegador,10);
+        aguardar.until(ExpectedConditions.stalenessOf(mensagemPop));
+
+        //Clicar no link com o texto "Logout"
+        navegador.findElement(By.linkText("Logout")).click();
+
+    }
+
+
+    @After
+    public void tearDown(){
+        //fechar o navegador
+        //navegador.quit();
+    }
+}
